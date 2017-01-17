@@ -1,11 +1,12 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
 #include <math.h>
 #include <allegro.h>
 
 int hipotenus(int,int,int,int);
 int uzaklik(int,int);
-int oyunaBasla(void);
+bool oyunaBasla(void);
 void ayarlar(void);
 void yuksekskor(void);
 
@@ -32,9 +33,14 @@ void main() {
 	rect(ekran,300,160,500,240,makecol(255,255,255));
 	rect(ekran,300,260,500,340,makecol(255,255,255));
 	rect(ekran,300,360,500,440,makecol(255,255,255));
-	int returnOyunaBasla=0;
+	bool returnOyunaBasla=false; //Bu deðiþken ile yenile butonuna basýlma iþlemini kontrol ediyoruz.
+	//Yenile butonuna basýlmýþsa oyunaBasla fonksiyonu geriye true deðerini döndürüyor ve çalýþmakta olan fonksiyon sonlandýrýlýyor.
+	//returnOyunaBasla deðiþkeni true olduðu zaman direk olarak yeni bir oyunaBasla fonksiyonu çaðýrýyoruz.
+	//Eðer bu deðiþkeni kullanmadan oyunaBasla fonksiyonu içinde yenile butonuna basýldýðýnda direk yeni bir oyunaBasla fonksiyonu çaðýrýrsak
+	//o an çalýþmakta olan oyunaBasla fonksiyonunu bitirmeden yeni bir oyunaBasla fonksiyonu daha oluþturmuþ olacaktýk. Bu þekilde sürekli iç içe
+	//fonksiyonlar oluþturmak hafýza sorununa sebep olacaktý.
 	while(1){
-		if(returnOyunaBasla==1){
+		if(returnOyunaBasla==true){
 			returnOyunaBasla=oyunaBasla();
 		}
 		blit(ekran,screen,0,0,0,0,800,600);
@@ -73,13 +79,14 @@ int uzaklik(int a,int b){
 	return sonuc;
 }
 
-int oyunaBasla(void){
+bool oyunaBasla(void){
 	
 	BITMAP *ekran,*menu,*yenile,*cikis;
 	SAMPLE *bang=load_sample("bang.wav");
-	int binayuksekligi[8],x,y,oyuncudegistir,renkr,renkg,renkb,konum1,konum2,oyuncu1x,oyuncu1y,oyuncu2x,oyuncu2y,topx,topy,m_x,m_y,v0,ruzgar,siradakix,siradakiy,karsidakix,karsidakiy,hak1,hak2,r1,g1,b1,r2,g2,b2,skor1,skor2,s1,s2,s3,zaman;
+	int binayuksekligi[8],x,y,renkr,renkg,renkb,konum1,konum2,oyuncu1x,oyuncu1y,oyuncu2x,oyuncu2y,topx,topy,m_x,m_y,v0,ruzgar,siradakix,siradakiy,karsidakix,karsidakiy,hak1,hak2,r1,g1,b1,r2,g2,b2,skor1,skor2,s1,s2,s3,zaman;
 	float t,sina,cosa;
 	double rsin,rcos,ruzgaryonu,radyanruzgaryonu;
+	bool oyuncudegistir;
 	srand(time(NULL));
 
 	//player 1'in sol 3 kuleden hangisinin üzerinde olacaðý random olarak belirleniyor.
@@ -164,7 +171,7 @@ int oyunaBasla(void){
 	skor2=0;
 	//toplam 6 atýþ yapýlacak tek(1,3,5) atýþlarda player 1, çift(2,4,6) atýþlarda player 2'nin sýrasý.
 	for(y=1;y<=6;y++){
-		oyuncudegistir=0;
+		oyuncudegistir=false;
 		if(y%2==1){
 			siradakix=oyuncu1x+40;
 			siradakiy=oyuncu1y-15;
@@ -178,13 +185,13 @@ int oyunaBasla(void){
 			karsidakiy=oyuncu1y-15;
 		}
 		zaman=100; //atýþ için 10 sn süre veriliyor.
-		while(oyuncudegistir!=1){
+		while(oyuncudegistir!=true){
 			if(mouse_x>350 && mouse_y>0 && mouse_x<450 && mouse_y<50 && mouse_b==1){ //menüye dön
 				clear_to_color(screen,makecol( 64, 0, 64) );
-				return 0;
+				return false;
 			}
 			if(mouse_x>350 && mouse_y>50 && mouse_x<450 && mouse_y<100 && mouse_b==1){ //yenile
-				return 1;
+				return true;
 			}
 			if(mouse_x>350 && mouse_y>100 && mouse_x<450 && mouse_y<150 && mouse_b==1){ //çýkýþ
 				exit(0);
@@ -193,11 +200,11 @@ int oyunaBasla(void){
 			if(zaman<=0){ //10 sn lik süre içinde atýþ yapýlmazsa yapýlacaklar.
 				if(siradakix==oyuncu1x+40){
 					hak1--;
-					oyuncudegistir=1;
+					oyuncudegistir=true;
 				}
 				if(siradakix==oyuncu2x+40){
 					hak2--;
-					oyuncudegistir=1;
+					oyuncudegistir=true;
 				}
 			}
 			blit(ekran,screen,0,0,0,0,800,600);
@@ -306,7 +313,7 @@ int oyunaBasla(void){
 						t+=0.1;
 						rest(10);
 					}
-					oyuncudegistir=1; //sýra diðer oyuncuya geçiyor.
+					oyuncudegistir=true; //sýra diðer oyuncuya geçiyor.
 				}
 			}
 			rest(100);
@@ -367,7 +374,7 @@ int oyunaBasla(void){
 	}
 
 	clear_to_color(screen,makecol( 64, 0, 64) ); //ana menüye dön
-	return 0;
+	return false;
 }
 
 void ayarlar(void){
